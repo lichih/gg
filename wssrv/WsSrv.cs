@@ -12,6 +12,12 @@ namespace hinata;
 [Serializable]
 public record Message(string type, string data);
 
+public class MyMessage
+{
+    public string sender = "";
+    public string line = "";
+}
+
 public class EchoYamlSrv : WebSocketBehavior
 {
     protected override void OnOpen()
@@ -26,11 +32,13 @@ public class EchoYamlSrv : WebSocketBehavior
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
             .Build();
         try {
-            var data = deserializer.Deserialize<Dictionary<string, string>>(e.Data);
+            // var data = deserializer.Deserialize<Dictionary<string, string>>(e.Data);
+            var data = deserializer.Deserialize<List<MyMessage>>(e.Data);
             var msg = $"pasrsed as YAML: [{e.Data}][{e.Data.Length}]";
             Send(msg);
-            var json = JsonConvert.SerializeObject(data);
-            msg = $"converted to JSON({json.Length}): {json}";
+            // serialize to JSON with line breaks
+            var json = JsonConvert.SerializeObject(data, Formatting.Indented);
+            msg = $"converted to JSON({json.Length}):\n{json}";
             Send(msg);
         }
         catch (Exception ex) {
