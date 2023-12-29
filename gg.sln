@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "srv", "srv\srv.csproj", "{A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj", "{58D5FC2C-2877-4412-A343-9A3DA5B68A10}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wssrv", "wssrv\wssrv.csproj", "{3D61AE31-94DC-420A-945C-E7797802C76F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,13 @@ Global
 		{58D5FC2C-2877-4412-A343-9A3DA5B68A10}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58D5FC2C-2877-4412-A343-9A3DA5B68A10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58D5FC2C-2877-4412-A343-9A3DA5B68A10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE4D9931-2271-48C8-8D26-FA3CB6F8630F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE4D9931-2271-48C8-8D26-FA3CB6F8630F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE4D9931-2271-48C8-8D26-FA3CB6F8630F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE4D9931-2271-48C8-8D26-FA3CB6F8630F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D61AE31-94DC-420A-945C-E7797802C76F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D61AE31-94DC-420A-945C-E7797802C76F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D61AE31-94DC-420A-945C-E7797802C76F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D61AE31-94DC-420A-945C-E7797802C76F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
