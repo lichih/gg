@@ -12,7 +12,7 @@ namespace hinata;
 [Serializable]
 public record Message(string type, string data);
 
-public class MyMessage
+public record MyMessage
 {
     public string sender = "";
     public string line = "";
@@ -33,6 +33,7 @@ public class EchoYamlSrv : WebSocketBehavior
             .Build();
         try {
             // var data = deserializer.Deserialize<Dictionary<string, string>>(e.Data);
+            // var data = deserializer.Deserialize<MyMessage>(e.Data);
             var data = deserializer.Deserialize<List<MyMessage>>(e.Data);
             var msg = $"pasrsed as YAML: [{e.Data}][{e.Data.Length}]";
             Send(msg);
