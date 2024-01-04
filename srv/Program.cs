@@ -22,7 +22,7 @@ app.Map("/echo", async ctx => {
         return;
     }
     var ws = await ctx.WebSockets.AcceptWebSocketAsync();
-    var echo = new EchoSrv();
+    BaseWebSocketSrv echo = new EchoSrv();
     echo.OnOpen(ws);
     while(ws.State == WebSocketState.Open) {
         var bufRecv = new byte[1024 * 4];
@@ -39,6 +39,7 @@ app.Map("/echo", async ctx => {
             
         }
     }
+    Console.WriteLine("EchoSrv.OnClose");
 });
 app.Map("/echo/yaml", async ctx => {
     if(!ctx.WebSockets.IsWebSocketRequest) {
@@ -46,7 +47,7 @@ app.Map("/echo/yaml", async ctx => {
         return;
     }
     var ws = await ctx.WebSockets.AcceptWebSocketAsync();
-    var echo = new EchoYamlSrv();
+    BaseWebSocketSrv echo = new EchoYamlSrv();
     echo.OnOpen(ws);
     while(ws.State == WebSocketState.Open) {
         var bufRecv = new byte[1024 * 4];
@@ -62,6 +63,7 @@ app.Map("/echo/yaml", async ctx => {
             await ws.SendAsync(bufResp, WebSocketMessageType.Text, true, CancellationToken.None);
         }
     }
+    Console.WriteLine("EchoYamlSrv.OnClose");
 });
 Console.WriteLine("Hinata is listening on port 4649, and providing WebSocket services:");
 

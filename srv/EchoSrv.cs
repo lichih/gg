@@ -18,13 +18,18 @@ public record MyMessage
     public string line = "";
 }
 
-public class EchoYamlSrv
+public abstract class BaseWebSocketSrv
 {
-    public void OnOpen(WebSocket ws)
+    public abstract void OnOpen(WebSocket ws);
+    public abstract string OnMessage(WebSocketReceiveResult result, string msg);
+}
+public class EchoYamlSrv : BaseWebSocketSrv
+{
+    public override void OnOpen(WebSocket ws)
     {
         Console.WriteLine("EchoYamlSrv.OnOpen");
     }
-    public string OnMessage(WebSocketReceiveResult result, string msg)
+    public override string OnMessage(WebSocketReceiveResult result, string msg)
     {
         var deserializer = new DeserializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
@@ -40,13 +45,13 @@ public class EchoYamlSrv
     }
 }
 
-public class EchoSrv
+public class EchoSrv : BaseWebSocketSrv
 {
-    public void OnOpen(WebSocket ws)
+    public override void OnOpen(WebSocket ws)
     {
         Console.WriteLine("EchoSrv.OnOpen");
     }
-    public string OnMessage(WebSocketReceiveResult result, string msg)
+    public override string OnMessage(WebSocketReceiveResult result, string msg)
     {
         var data = new Message("echo", msg);
         var json = JsonConvert.SerializeObject(data, Formatting.Indented);
