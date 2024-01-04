@@ -22,6 +22,7 @@ public class EchoYamlSrv
 {
     public void OnOpen(WebSocket ws)
     {
+        Console.WriteLine("EchoYamlSrv.OnOpen");
     }
     public string OnMessage(WebSocketReceiveResult result, string msg)
     {
@@ -43,6 +44,7 @@ public class EchoSrv
 {
     public void OnOpen(WebSocket ws)
     {
+        Console.WriteLine("EchoSrv.OnOpen");
     }
     public string OnMessage(WebSocketReceiveResult result, string msg)
     {

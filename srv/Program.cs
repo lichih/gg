@@ -25,16 +25,18 @@ app.Map("/echo", async ctx => {
     var echo = new EchoSrv();
     echo.OnOpen(ws);
     while(ws.State == WebSocketState.Open) {
-        var buffer = new byte[1024 * 4];
-        var result = await ws.ReceiveAsync(buffer, CancellationToken.None);
-        if(result.MessageType == WebSocketMessageType.Close) {
+        var bufRecv = new byte[1024 * 4];
+        var recv = await ws.ReceiveAsync(bufRecv, CancellationToken.None);
+        if(recv.MessageType == WebSocketMessageType.Close) {
             await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
             break;
         }
-        else if(result.MessageType == WebSocketMessageType.Text) {
-            var msg = Encoding.UTF8.GetString(buffer, 0, result.Count);
-            var r = echo.OnMessage(result, msg);
-            await ws.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+        else if(recv.MessageType == WebSocketMessageType.Text) {
+            var msg = Encoding.UTF8.GetString(bufRecv, 0, recv.Count);
+            string resp = echo.OnMessage(recv, msg);
+            var bufResp = Encoding.UTF8.GetBytes(resp);
+            await ws.SendAsync(bufResp, WebSocketMessageType.Text, true, CancellationToken.None);
+            
         }
     }
 });
@@ -47,16 +49,17 @@ app.Map("/echo/yaml", async ctx => {
     var echo = new EchoYamlSrv();
     echo.OnOpen(ws);
     while(ws.State == WebSocketState.Open) {
-        var buffer = new byte[1024 * 4];
-        var result = await ws.ReceiveAsync(buffer, CancellationToken.None);
-        if(result.MessageType == WebSocketMessageType.Close) {
+        var bufRecv = new byte[1024 * 4];
+        var recv = await ws.ReceiveAsync(bufRecv, CancellationToken.None);
+        if(recv.MessageType == WebSocketMessageType.Close) {
             await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
             break;
         }
-        else if(result.MessageType == WebSocketMessageType.Text) {
-            var msg = Encoding.UTF8.GetString(buffer, 0, result.Count);
-            var r = echo.OnMessage(result, msg);
-            await ws.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+        else if(recv.MessageType == WebSocketMessageType.Text) {
+            var msg = Encoding.UTF8.GetString(bufRecv, 0, recv.Count);
+            var resp = echo.OnMessage(recv, msg);
+            var bufResp = Encoding.UTF8.GetBytes(resp);
+            await ws.SendAsync(bufResp, WebSocketMessageType.Text, true, CancellationToken.None);
         }
     }
 });
