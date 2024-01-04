@@ -53,8 +53,10 @@ public class EchoSrv : BaseWebSocketSrv
     }
     public override string OnMessage(WebSocketReceiveResult result, string msg)
     {
-        var data = new Message("echo", msg);
-        var json = JsonConvert.SerializeObject(data, Formatting.Indented);
-        return json;
+        var resp = new string(msg);
+        return resp;
+        // var data = new Message("echo", msg);
+        // var json = JsonConvert.SerializeObject(data, Formatting.Indented);
+        // return json;
     }
 }
