@@ -20,16 +20,24 @@ public record MyMessage
 
 public abstract class BaseWebSocketSrv
 {
+    protected WebSocket ws;
+    public BaseWebSocketSrv(WebSocket ws) => this.ws = ws;
     public abstract void OnOpen(WebSocket ws);
-    public abstract string OnMessage(WebSocketReceiveResult result, string msg);
+    public abstract void OnMessage(WebSocketReceiveResult result, string msg);
+    protected void Send(string msg)
+    {
+        var buf = System.Text.Encoding.UTF8.GetBytes(msg);
+        ws.SendAsync(buf, WebSocketMessageType.Text, true, CancellationToken.None);
+    }
 }
 public class EchoYamlSrv : BaseWebSocketSrv
 {
+    public EchoYamlSrv(WebSocket ws) : base(ws) {}
     public override void OnOpen(WebSocket ws)
     {
         Console.WriteLine("EchoYamlSrv.OnOpen");
     }
-    public override string OnMessage(WebSocketReceiveResult result, string msg)
+    public override void OnMessage(WebSocketReceiveResult result, string msg)
     {
         var deserializer = new DeserializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
@@ -37,24 +45,28 @@ public class EchoYamlSrv : BaseWebSocketSrv
         try {
             var data = deserializer.Deserialize<List<MyMessage>>(msg);
             var json = JsonConvert.SerializeObject(data, Formatting.Indented);
-            return json;
+            // return json;
+            Send(json);
         }
         catch (Exception ex) {
-            return $"failed to parse as YAML: [{msg}][{msg.Length}] ex: {ex.Message}";
+            Console.WriteLine($"failed to parse as YAML: [{msg}][{msg.Length}] ex: {ex.Message}");
         }
     }
 }
 
 public class EchoSrv : BaseWebSocketSrv
 {
+    public EchoSrv(WebSocket ws) : base(ws) {}
     public override void OnOpen(WebSocket ws)
     {
         Console.WriteLine("EchoSrv.OnOpen");
     }
-    public override string OnMessage(WebSocketReceiveResult result, string msg)
+    public override void OnMessage(WebSocketReceiveResult result, string msg)
     {
         var resp = new string(msg);
-        return resp;
+        Console.WriteLine($"EchoSrv.OnMessage: {resp}");
+        Send(resp);
+        // return resp;
         // var data = new Message("echo", msg);
         // var json = JsonConvert.SerializeObject(data, Formatting.Indented);
         // return json;
