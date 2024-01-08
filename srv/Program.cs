@@ -27,7 +27,6 @@ app.UseWebSockets();
 //     g = new GetMessage("Alice"),
 // };
 var cmd_sample = new ChatCommand {
-    l = new Login("Alice"),
     s = new SendMessage("Alice", "Hello"),
     g = new GetMessage("Bob"),
 };
@@ -47,59 +46,70 @@ Console.WriteLine($"ChatSrv.OnOpen: sample:\n{s}");
 // Console.WriteLine($"ChatSrv.OnOpen: sample:\n{cmd}");
 
 ChatRoom room = new ChatRoom();
+room.SendMessage("System", "Welcome to Hinata Chat");
 
 app.Map("/chat", async ctx => {
     if(!ctx.WebSockets.IsWebSocketRequest) {
         ctx.Response.StatusCode = 400;
         return;
     }
+    string? uname = ctx.Request.Headers["uname"];
+    Console.WriteLine($"ChatSrv.OnOpen: uname={uname} empty:{uname == ""} null:{uname == null}");
+
+    // abort with 401 if no uname
+    if(uname == "" || uname == null) {
+        ctx.Response.StatusCode = 401;
+        return;
+    }
 
     var ws = await ctx.WebSockets.AcceptWebSocketAsync();
+    var msgs = room.GetMessages(uname);
+    var resp = JsonConvert.SerializeObject(msgs);
+    var bufResp = Encoding.UTF8.GetBytes(resp);
+    await ws.SendAsync(bufResp, WebSocketMessageType.Text, true, CancellationToken.None);
+
     var bufRecv = new byte[1024 * 4];
-    string uname = "";
-    while(ws.State == WebSocketState.Open) {
-        var recv = await ws.ReceiveAsync(bufRecv, CancellationToken.None);
-        if(recv.MessageType == WebSocketMessageType.Close) {
-            await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
-            break;
-        }
-        else if(recv.MessageType == WebSocketMessageType.Text) {
-            var msg = Encoding.UTF8.GetString(bufRecv, 0, recv.Count);
-            try {
-                Console.WriteLine($"ChatSrv.OnMessage: Got\n{msg}");
-                // cmd = deserializer.Deserialize<ChatCommand>(msg);
-                // Console.WriteLine($"ChatSrv.OnMessage: Parsed:\n{cmd}");
-                var cmd = JsonConvert.DeserializeObject<ChatCommand>(msg);
-                Console.WriteLine($"ChatSrv.OnMessage: Parsed:\n{cmd}");
-                if(cmd == null) {
-                    Console.WriteLine($"ChatSrv.OnMessage: cmd is null");
-                    continue;
-                }
-                if(cmd.l != null) {
-                    Console.WriteLine($"ChatSrv.OnMessage: uname={uname}");
-                    room.SendMessage("System", $"{cmd.l.name} joined");
-                    Console.WriteLine($"ChatSrv.OnMessage: {cmd.l.name} joined");
-                }
-                if(cmd.s != null) {
-                    if(uname == "") {
+    try {
+        while(ws.State == WebSocketState.Open) {
+            var recv = await ws.ReceiveAsync(bufRecv, CancellationToken.None);
+            if(recv.MessageType == WebSocketMessageType.Close) {
+                await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+                break;
+            }
+            else if(recv.MessageType == WebSocketMessageType.Text) {
+                var msg = Encoding.UTF8.GetString(bufRecv, 0, recv.Count);
+                try {
+                    Console.WriteLine($"ChatSrv.OnMessage: Got\n{msg}");
+                    var cmd = JsonConvert.DeserializeObject<ChatCommand>(msg);
+                    Console.WriteLine($"ChatSrv.OnMessage: Parsed:\n{cmd}");
+                    if(cmd == null) {
+                        Console.WriteLine($"ChatSrv.OnMessage: cmd is null");
                         continue;
                     }
-                    room.SendMessage(uname, cmd.s.c);
-                }
-                if(cmd.g != null) {
-                    if(uname == "") {
-                        continue;
+                    if(cmd.s != null) {
+                        if(uname == "") {
+                            continue;
+                        }
+                        room.SendMessage(uname, cmd.s.c);
                     }
-                    var msgs = room.GetMessages(uname);
-                    var resp = JsonConvert.SerializeObject(msgs);
-                    var bufResp = Encoding.UTF8.GetBytes(resp);
-                    await ws.SendAsync(bufResp, WebSocketMessageType.Text, true, CancellationToken.None);
+                    if(cmd.g != null) {
+                        if(uname == "") {
+                            continue;
+                        }
+                        msgs = room.GetMessages(uname);
+                        resp = JsonConvert.SerializeObject(msgs);
+                        bufResp = Encoding.UTF8.GetBytes(resp);
+                        await ws.SendAsync(bufResp, WebSocketMessageType.Text, true, CancellationToken.None);
+                    }
                 }
-            }
-            catch(Exception e) {
-                Console.WriteLine($"ChatSrv.OnMessage Exception: {e}");
+                catch(Exception e) {
+                    Console.WriteLine($"ChatSrv.OnMessage Exception: {e}");
+                }
             }
         }
+    }
+    catch(WebSocketException e) {
+        Console.WriteLine($"ChatSrv.OnMessage Ex");
     }
     bufRecv = null;
     Console.WriteLine("EchoSrv.OnClose");

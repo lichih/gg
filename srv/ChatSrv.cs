@@ -1,13 +1,11 @@
 namespace ChatSrv
 {
     public record Message(string sender, string content);
-    public record Login(string name);
     public record SendMessage(string s, string c);
     public record GetMessage(string exc);
 
     public record ChatCommand {
         // public string command = ""; // SendMessage, GetMessage
-        public Login? l = null;
         public SendMessage? s = null;
         public GetMessage? g = null;
     }
