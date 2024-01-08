@@ -47,7 +47,7 @@ public class UnitTestChat
         client1.SendAsync(buf, WebSocketMessageType.Text, false, CancellationToken.None).Wait();
         msgs = RecvMsgs(client2);
         Console.WriteLine($"TestChatOkMultipleUser: msgs.Count: {msgs?.Count}");
-        // Assert.IsTrue(msgs?.Count > 1);
+        Assert.IsTrue(msgs?.Count > 1);
 
         client1.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None).Wait();
         client2.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None).Wait();
