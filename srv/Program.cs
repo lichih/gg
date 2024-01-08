@@ -27,8 +27,8 @@ app.UseWebSockets();
 //     g = new GetMessage("Alice"),
 // };
 var cmd_sample = new ChatCommand {
-    s = new SendMessage("Alice", "Hello"),
-    g = new GetMessage("Bob"),
+    s = new SendMessage("Hello, Alice"),
+    g = new GetMessage(),
 };
 var s = JsonConvert.SerializeObject(cmd_sample);
 Console.WriteLine($"ChatSrv.OnOpen: sample:\n{s}");
@@ -63,6 +63,8 @@ app.Map("/chat", async ctx => {
     }
 
     var ws = await ctx.WebSockets.AcceptWebSocketAsync();
+    room.clients.Add(ws);
+
     var msgs = room.GetMessages(uname);
     var resp = JsonConvert.SerializeObject(msgs);
     var bufResp = Encoding.UTF8.GetBytes(resp);
@@ -91,6 +93,14 @@ app.Map("/chat", async ctx => {
                             continue;
                         }
                         room.SendMessage(uname, cmd.s.c);
+                        msgs = room.GetMessages();
+                        resp = JsonConvert.SerializeObject(msgs);
+                        bufResp = Encoding.UTF8.GetBytes(resp);
+                        foreach(var c in room.clients) {
+                            if (c.State == WebSocketState.Open && c != ws) {
+                                await c.SendAsync(bufResp, WebSocketMessageType.Text, true, CancellationToken.None);
+                            }
+                        }
                     }
                     if(cmd.g != null) {
                         if(uname == "") {
@@ -109,10 +119,11 @@ app.Map("/chat", async ctx => {
         }
     }
     catch(WebSocketException e) {
-        Console.WriteLine($"ChatSrv.OnMessage Ex");
+        Console.WriteLine($"ChatSrv.OnException: {e}");
     }
     bufRecv = null;
-    Console.WriteLine("EchoSrv.OnClose");
+    room.clients.Remove(ws);
+    Console.WriteLine("ChatSrv.OnClose");
 });
 
 app.Map("/echo", async ctx => {
