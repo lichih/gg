@@ -30,6 +30,26 @@ public abstract class BaseWebSocketSrv
         ws.SendAsync(buf, WebSocketMessageType.Text, true, CancellationToken.None);
     }
 }
+
+public class EchoSrv : BaseWebSocketSrv
+{
+    public EchoSrv(WebSocket ws) : base(ws) {}
+    public override void OnOpen(WebSocket ws)
+    {
+        Console.WriteLine("EchoSrv.OnOpen");
+    }
+    public override void OnMessage(WebSocketReceiveResult result, string msg)
+    {
+        var resp = new string(msg);
+        Console.WriteLine($"EchoSrv.OnMessage: {resp}");
+        Send(resp);
+        // return resp;
+        // var data = new Message("echo", msg);
+        // var json = JsonConvert.SerializeObject(data, Formatting.Indented);
+        // return json;
+    }
+}
+
 public class EchoYamlSrv : BaseWebSocketSrv
 {
     public EchoYamlSrv(WebSocket ws) : base(ws) {}
@@ -54,21 +74,3 @@ public class EchoYamlSrv : BaseWebSocketSrv
     }
 }
 
-public class EchoSrv : BaseWebSocketSrv
-{
-    public EchoSrv(WebSocket ws) : base(ws) {}
-    public override void OnOpen(WebSocket ws)
-    {
-        Console.WriteLine("EchoSrv.OnOpen");
-    }
-    public override void OnMessage(WebSocketReceiveResult result, string msg)
-    {
-        var resp = new string(msg);
-        Console.WriteLine($"EchoSrv.OnMessage: {resp}");
-        Send(resp);
-        // return resp;
-        // var data = new Message("echo", msg);
-        // var json = JsonConvert.SerializeObject(data, Formatting.Indented);
-        // return json;
-    }
-}
